@@ -1,6 +1,6 @@
 {
-  "name": "pdfjs-dist",
-  "version": "2.7.35",
+  "name": "pdfjs-xfa-dist",
+  "version": "1",
   "main": [
     "build/pdf.js",
     "build/pdf.worker.js"
@@ -9,6 +9,8 @@
   "keywords": [
     "Mozilla",
     "pdf",
-    "pdf.js"
+    "pdf.js",
+    "xfa",
+    "xref"
   ]
 }
