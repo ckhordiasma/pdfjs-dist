@@ -165,8 +165,8 @@ var _jpg = __w_pdfjs_require__(182);
 
 var _jpx = __w_pdfjs_require__(183);
 
-var pdfjsVersion = '2.6.347';
-var pdfjsBuild = '3be9c65f';
+var pdfjsVersion = '2.7.35';
+var pdfjsBuild = 'f9d56320f';
 
 /***/ }),
 /* 1 */
@@ -184,6 +184,7 @@ exports.assert = assert;
 exports.bytesToString = bytesToString;
 exports.createPromiseCapability = createPromiseCapability;
 exports.escapeString = escapeString;
+exports.encodeToXmlString = encodeToXmlString;
 exports.getModificationDate = getModificationDate;
 exports.getVerbosityLevel = getVerbosityLevel;
 exports.info = info;
@@ -1060,8 +1061,8 @@ function isArrayEqual(arr1, arr2) {
 }
 
 function getModificationDate() {
-  var date = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Date(Date.now());
-  var buffer = [date.getUTCFullYear().toString(), (date.getUTCMonth() + 1).toString().padStart(2, "0"), (date.getUTCDate() + 1).toString().padStart(2, "0"), date.getUTCHours().toString().padStart(2, "0"), date.getUTCMinutes().toString().padStart(2, "0"), date.getUTCSeconds().toString().padStart(2, "0")];
+  var date = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Date();
+  var buffer = [date.getUTCFullYear().toString(), (date.getUTCMonth() + 1).toString().padStart(2, "0"), date.getUTCDate().toString().padStart(2, "0"), date.getUTCHours().toString().padStart(2, "0"), date.getUTCMinutes().toString().padStart(2, "0"), date.getUTCSeconds().toString().padStart(2, "0")];
   return buffer.join("");
 }
 
@@ -1117,6 +1118,57 @@ var createObjectURL = function createObjectURLClosure() {
 }();
 
 exports.createObjectURL = createObjectURL;
+var XMLEntities = {
+  0x3c: "&lt;",
+  0x3e: "&gt;",
+  0x26: "&amp;",
+  0x22: "&quot;",
+  0x27: "&apos;"
+};
+
+function encodeToXmlString(str) {
+  var buffer = [];
+  var start = 0;
+
+  for (var i = 0, ii = str.length; i < ii; i++) {
+    var _char = str.codePointAt(i);
+
+    if (0x20 <= _char && _char <= 0x7e) {
+      var entity = XMLEntities[_char];
+
+      if (entity) {
+        if (start < i) {
+          buffer.push(str.substring(start, i));
+        }
+
+        buffer.push(entity);
+        start = i + 1;
+      }
+    } else {
+      if (start < i) {
+        buffer.push(str.substring(start, i));
+      }
+
+      buffer.push("&#x".concat(_char.toString(16).toUpperCase(), ";"));
+
+      if (_char > 0xd7ff && (_char < 0xe000 || _char > 0xfffd)) {
+        i++;
+      }
+
+      start = i + 1;
+    }
+  }
+
+  if (buffer.length === 0) {
+    return str;
+  }
+
+  if (start < str.length) {
+    buffer.push(str.substring(start, str.length));
+  }
+
+  return buffer.join("");
+}
 
 /***/ }),
 /* 2 */
@@ -1127,17 +1179,12 @@ exports.createObjectURL = createObjectURL;
 
 var _is_node = __w_pdfjs_require__(3);
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
 if (typeof globalThis === "undefined" || !globalThis._pdfjsCompatibilityChecked) {
   if (typeof globalThis === "undefined" || globalThis.Math !== Math) {
     globalThis = __w_pdfjs_require__(4);
   }
 
   globalThis._pdfjsCompatibilityChecked = true;
-  var hasDOM = (typeof window === "undefined" ? "undefined" : _typeof(window)) === "object" && (typeof document === "undefined" ? "undefined" : _typeof(document)) === "object";
-  var userAgent = typeof navigator !== "undefined" && navigator.userAgent || "";
-  var isIE = /Trident/.test(userAgent);
 
   (function checkNodeBtoa() {
     if (globalThis.btoa || !_is_node.isNodeJS) {
@@ -1156,96 +1203,6 @@ if (typeof globalThis === "undefined" || !globalThis._pdfjsCompatibilityChecked)
 
     globalThis.atob = function (input) {
       return Buffer.from(input, "base64").toString("binary");
-    };
-  })();
-
-  (function checkChildNodeRemove() {
-    if (!hasDOM) {
-      return;
-    }
-
-    if (typeof Element.prototype.remove !== "undefined") {
-      return;
-    }
-
-    Element.prototype.remove = function () {
-      if (this.parentNode) {
-        this.parentNode.removeChild(this);
-      }
-    };
-  })();
-
-  (function checkDOMTokenListAddRemove() {
-    if (!hasDOM || _is_node.isNodeJS) {
-      return;
-    }
-
-    var div = document.createElement("div");
-    div.classList.add("testOne", "testTwo");
-
-    if (div.classList.contains("testOne") === true && div.classList.contains("testTwo") === true) {
-      return;
-    }
-
-    var OriginalDOMTokenListAdd = DOMTokenList.prototype.add;
-    var OriginalDOMTokenListRemove = DOMTokenList.prototype.remove;
-
-    DOMTokenList.prototype.add = function () {
-      for (var _len = arguments.length, tokens = new Array(_len), _key = 0; _key < _len; _key++) {
-        tokens[_key] = arguments[_key];
-      }
-
-      for (var _i = 0, _tokens = tokens; _i < _tokens.length; _i++) {
-        var token = _tokens[_i];
-        OriginalDOMTokenListAdd.call(this, token);
-      }
-    };
-
-    DOMTokenList.prototype.remove = function () {
-      for (var _len2 = arguments.length, tokens = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        tokens[_key2] = arguments[_key2];
-      }
-
-      for (var _i2 = 0, _tokens2 = tokens; _i2 < _tokens2.length; _i2++) {
-        var token = _tokens2[_i2];
-        OriginalDOMTokenListRemove.call(this, token);
-      }
-    };
-  })();
-
-  (function checkDOMTokenListToggle() {
-    if (!hasDOM || _is_node.isNodeJS) {
-      return;
-    }
-
-    var div = document.createElement("div");
-
-    if (div.classList.toggle("test", 0) === false) {
-      return;
-    }
-
-    DOMTokenList.prototype.toggle = function (token) {
-      var force = arguments.length > 1 ? !!arguments[1] : !this.contains(token);
-      return this[force ? "add" : "remove"](token), force;
-    };
-  })();
-
-  (function checkWindowHistoryPushStateReplaceState() {
-    if (!hasDOM || !isIE) {
-      return;
-    }
-
-    var OriginalPushState = window.history.pushState;
-    var OriginalReplaceState = window.history.replaceState;
-
-    window.history.pushState = function (state, title, url) {
-      var args = url === undefined ? [state, title] : [state, title, url];
-      OriginalPushState.apply(this, args);
-    };
-
-    window.history.replaceState = function (state, title, url) {
-      var args = url === undefined ? [state, title] : [state, title, url];
-      OriginalReplaceState.apply(this, args);
     };
   })();
 
@@ -7619,6 +7576,7 @@ exports.getLookupTableFactory = getLookupTableFactory;
 exports.getInheritableProperty = getInheritableProperty;
 exports.toRomanNumerals = toRomanNumerals;
 exports.log2 = log2;
+exports.parseXFAPath = parseXFAPath;
 exports.readInt8 = readInt8;
 exports.readUint16 = readUint16;
 exports.readUint32 = readUint32;
@@ -7794,6 +7752,25 @@ function readUint32(data, offset) {
 
 function isWhiteSpace(ch) {
   return ch === 0x20 || ch === 0x09 || ch === 0x0d || ch === 0x0a;
+}
+
+function parseXFAPath(path) {
+  var positionPattern = /(.+)\[([0-9]+)\]$/;
+  return path.split(".").map(function (component) {
+    var m = component.match(positionPattern);
+
+    if (m) {
+      return {
+        name: m[1],
+        pos: parseInt(m[2], 10)
+      };
+    }
+
+    return {
+      name: component,
+      pos: 0
+    };
+  });
 }
 
 /***/ }),

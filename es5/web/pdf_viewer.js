@@ -245,8 +245,8 @@ var _pdf_single_page_viewer = __w_pdfjs_require__(18);
 
 var _pdf_viewer = __w_pdfjs_require__(20);
 
-var pdfjsVersion = '2.6.347';
-var pdfjsBuild = '3be9c65f';
+var pdfjsVersion = '2.7.35';
+var pdfjsBuild = 'f9d56320f';
 
 /***/ }),
 /* 1 */
@@ -429,7 +429,6 @@ exports.isValidRotation = isValidRotation;
 exports.isValidScrollMode = isValidScrollMode;
 exports.isValidSpreadMode = isValidSpreadMode;
 exports.isPortraitOrientation = isPortraitOrientation;
-exports.clamp = clamp;
 exports.getPDFFileNameFromURL = getPDFFileNameFromURL;
 exports.noContextMenuHandler = noContextMenuHandler;
 exports.parseQueryString = parseQueryString;
@@ -606,7 +605,7 @@ exports.NullL10n = NullL10n;
 
 function getOutputScale(ctx) {
   var devicePixelRatio = window.devicePixelRatio || 1;
-  var backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
+  var backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
   var pixelRatio = devicePixelRatio / backingStoreRatio;
   return {
     sx: pixelRatio,
@@ -2866,13 +2865,6 @@ var DownloadManager = /*#__PURE__*/function () {
   }, {
     key: "downloadData",
     value: function downloadData(data, filename, contentType) {
-      if (navigator.msSaveBlob) {
-        navigator.msSaveBlob(new Blob([data], {
-          type: contentType
-        }), filename);
-        return;
-      }
-
       var blobUrl = (0, _pdfjsLib.createObjectURL)(data, contentType, _viewer_compatibility.viewerCompatibilityParams.disableCreateObjectURL);
 
       _download(blobUrl, filename);
@@ -2881,14 +2873,6 @@ var DownloadManager = /*#__PURE__*/function () {
     key: "download",
     value: function download(blob, url, filename) {
       var sourceEventType = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "download";
-
-      if (navigator.msSaveBlob) {
-        if (!navigator.msSaveBlob(blob, filename)) {
-          this.downloadUrl(url, filename);
-        }
-
-        return;
-      }
 
       if (_viewer_compatibility.viewerCompatibilityParams.disableCreateObjectURL) {
         this.downloadUrl(url, filename);
@@ -2923,12 +2907,11 @@ var compatibilityParams = Object.create(null);
   var platform = typeof navigator !== "undefined" && navigator.platform || "";
   var maxTouchPoints = typeof navigator !== "undefined" && navigator.maxTouchPoints || 1;
   var isAndroid = /Android/.test(userAgent);
-  var isIE = /Trident/.test(userAgent);
   var isIOS = /\b(iPad|iPhone|iPod)(?=;)/.test(userAgent) || platform === "MacIntel" && maxTouchPoints > 1;
   var isIOSChrome = /CriOS/.test(userAgent);
 
   (function checkOnBlobSupport() {
-    if (isIE || isIOSChrome) {
+    if (isIOSChrome) {
       compatibilityParams.disableCreateObjectURL = true;
     }
   })();
@@ -6570,6 +6553,10 @@ var BaseViewer = /*#__PURE__*/function () {
       throw new Error("Invalid `container` and/or `viewer` option.");
     }
 
+    if (getComputedStyle(this.container).position !== "absolute") {
+      throw new Error("The `container` must be absolutely positioned.");
+    }
+
     this.eventBus = options.eventBus;
     this.linkService = options.linkService || new _pdf_link_service.SimpleLinkService();
     this.downloadManager = options.downloadManager || null;
@@ -7078,6 +7065,8 @@ var BaseViewer = /*#__PURE__*/function () {
           if (y === null && this._location) {
             x = this._location.left;
             y = this._location.top;
+          } else if (typeof y !== "number") {
+            y = pageHeight;
           }
 
           break;

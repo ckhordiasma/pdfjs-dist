@@ -386,6 +386,7 @@ export function bytesToString(bytes: any): string;
 export function createPromiseCapability(): PromiseCapability;
 export function createObjectURL(data: any, contentType: any, forceDataSchema?: boolean): string;
 export function escapeString(str: any): any;
+export function encodeToXmlString(str: any): any;
 export function getModificationDate(date?: Date): string;
 export function getVerbosityLevel(): number;
 export function info(msg: any): void;

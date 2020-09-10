@@ -167,6 +167,7 @@ export type PDFDocumentStats = {
         [x: string]: boolean;
     };
 };
+export type PDFDocumentXFA = Object;
 export type IPDFStreamFactory = Function;
 /**
  * The loading task controls the operations required to load a PDF document
@@ -522,6 +523,9 @@ export type PDFWorkerParameters = {
  *   document).
  */
 /**
+ * @typedef {Object} PDFDocumentXFA
+ */
+/**
  * This is the main entry point for loading a PDF and interacting with it.
  *
  * NOTE: If a URL is used to fetch the PDF data a standard Fetch API call (or
@@ -752,6 +756,12 @@ export class PDFDocumentProxy {
      *   {@link PDFDocumentStats}).
      */
     getStats(): Promise<PDFDocumentStats>;
+    /**
+     * @returns {Promise<PDFDocumentXFA>} A promise this is resolved with
+     *   the XFA root structure of the document.
+     *   {@link PDFDocumentXFA}).
+     */
+    getXFA(): Promise<PDFDocumentXFA>;
     /**
      * Cleans up resources allocated by the document on both the main and worker
      * threads.
