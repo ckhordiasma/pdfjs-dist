@@ -1,17 +1,5 @@
 # PDF.js
 
-This is a slightly modified version of PDF.js to allow for XFA data extraction. To use it, do something like the following:
-```
-const loadingTask = pdfjs.getDocument('/file.pdf');
-loadingTask.promise.then(function(pdf){
-    pdf.getXFA().then(function (xfaDict){
-        console.log(xfaDict);
-    });
-})
-```
-
-----
-
 PDF.js is a Portable Document Format (PDF) library that is built with HTML5.
 Our goal is to create a general-purpose, web standards-based platform for
 parsing and rendering PDFs.

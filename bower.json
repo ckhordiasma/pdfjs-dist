@@ -1,6 +1,6 @@
 {
-  "name": "pdfjs-xfa-dist",
-  "version": "1",
+  "name": "pdfjs-dist",
+  "version": "2.7.37",
   "main": [
     "build/pdf.js",
     "build/pdf.worker.js"

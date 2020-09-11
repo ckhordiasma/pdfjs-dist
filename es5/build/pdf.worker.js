@@ -135,8 +135,8 @@ Object.defineProperty(exports, "WorkerMessageHandler", {
 
 var _worker = __w_pdfjs_require__(1);
 
-var pdfjsVersion = '2.7.35';
-var pdfjsBuild = 'f9d56320f';
+var pdfjsVersion = '2.7.37';
+var pdfjsBuild = '9cf1a2754';
 
 /***/ }),
 /* 1 */
@@ -279,7 +279,7 @@ var WorkerMessageHandler = /*#__PURE__*/function () {
       var WorkerTasks = [];
       var verbosity = (0, _util.getVerbosityLevel)();
       var apiVersion = docParams.apiVersion;
-      var workerVersion = '2.7.35';
+      var workerVersion = '2.7.37';
 
       if (apiVersion !== workerVersion) {
         throw new Error("The API version \"".concat(apiVersion, "\" does not match ") + "the Worker version \"".concat(workerVersion, "\"."));
@@ -637,22 +637,23 @@ var WorkerMessageHandler = /*#__PURE__*/function () {
           return stream.bytes;
         });
       });
-      handler.on("GetXFA", function wphSetupXFA(data) {
-        var xref = pdfManager.pdfDocument.xref;
-        var xfa = pdfManager.pdfDocument.xfa;
-        var xfaDict = [];
-
-        for (var i = 0; i < xfa.length; i++) {
-          if (i % 2 == 0) {
-            var bytes = xref.fetch(xfa[i + 1]).getBytes();
-            xfaDict[xfa[i]] = new TextDecoder().decode(bytes);
-          }
-        }
-
-        return xfaDict;
-      });
       handler.on("GetStats", function wphSetupGetStats(data) {
         return pdfManager.ensureXRef("stats");
+      });
+      handler.on("GetXFA", function wphSetupXFA(data) {
+        var xref = pdfManager.pdfDocument.xref;
+        return pdfManager.ensureDoc("xfa").then(function (xfa) {
+          var xfaDict = [];
+
+          for (var i = 0; i < xfa.length; i++) {
+            if (i % 2 == 0) {
+              var bytes = xref.fetch(xfa[i + 1]).getBytes();
+              xfaDict[xfa[i]] = new TextDecoder().decode(bytes);
+            }
+          }
+
+          return xfaDict;
+        });
       });
       handler.on("GetAnnotations", function (_ref6) {
         var pageIndex = _ref6.pageIndex,

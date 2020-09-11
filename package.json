@@ -1,18 +1,18 @@
 {
-  "name": "pdfjs-xfa-dist",
-  "version": "1",
+  "name": "pdfjs-dist",
+  "version": "2.7.37",
   "main": "build/pdf.js",
   "types": "types/pdf.d.ts",
-  "description": "Build of Mozilla's PDF.js library with XFA data extraction included in API",
+  "description": "Generic build of Mozilla's PDF.js library, with additional access to XFA information through API",
   "keywords": [
     "Mozilla",
     "pdf",
     "pdf.js",
-    "xfa",
-    "xref"
+    "xref",
+    "xfa"
   ],
-  "homepage": "https://github.com/ckhordiasma/pdf.js",
-  "bugs": "https://github.com/ckhordiasma/pdfjs-dist/pulls",
+  "homepage": "http://github.com/ckhordiasma/pdf.js/",
+  "bugs": "https://github.com/ckhordiasma/pdf.js/issues",
   "license": "Apache-2.0",
   "browser": {
     "canvas": false,
